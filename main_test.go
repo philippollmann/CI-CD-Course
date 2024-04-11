@@ -180,6 +180,23 @@ func TestDeleteProduct(t *testing.T) {
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 }
 
+func TestGetAveragePrice(t *testing.T) {
+	clearTable()
+	addProducts(3)
+
+	req, _ := http.NewRequest("GET", "/price/average", nil)
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var m map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	if m["average_price"] != 20.0 {
+		t.Errorf("Expected the average price to be 20. Got '%v'", m["average_price"])
+	}
+}
+
 func TestGetCheapestProduct(t *testing.T) {
 	clearTable()
 	addProducts(10)

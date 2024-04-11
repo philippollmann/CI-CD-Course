@@ -94,6 +94,20 @@ func (a *App) getCheapestProduct(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
+func (a *App) getAveragePrice(w http.ResponseWriter, _ *http.Request) {
+	var p product
+
+	if err := p.getAveragePrice(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	jsonResponse := map[string]interface{}{
+		"average_price": p.Price,
+	}
+
+	respondWithJSON(w, http.StatusOK, jsonResponse)
+}
+
 func (a *App) searchProduct(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query().Get("query")
@@ -178,6 +192,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.getProduct).Methods("GET")
 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.updateProduct).Methods("PUT")
 	a.Router.HandleFunc("/product/{id:[0-9]+}", a.deleteProduct).Methods("DELETE")
+	a.Router.HandleFunc("/price/average", a.getAveragePrice).Methods("GET")
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
