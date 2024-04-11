@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strconv"
 	"testing"
@@ -176,6 +178,61 @@ func TestDeleteProduct(t *testing.T) {
 	req, _ = http.NewRequest("GET", "/product/1", nil)
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusNotFound, response.Code)
+}
+
+func TestGetCheapestProduct(t *testing.T) {
+	clearTable()
+	addProducts(10)
+
+	req, _ := http.NewRequest("GET", "/product/cheapest", nil)
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var m map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	if m["price"] != 10.0 {
+		t.Errorf("Expected the price to be 10. Got '%v'", m["price"])
+	}
+}
+
+func TestSearchProduct(t *testing.T) {
+	clearTable()
+	addProducts(2)
+
+	params := url.Values{}
+	params.Add("query", "Product 1")
+	endpoint := fmt.Sprintf("%s?%s", "/search", params.Encode())
+
+	req, _ := http.NewRequest("GET", endpoint, nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var m map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &m)
+
+	if m["name"] != "Product 1" {
+		t.Errorf("Expected the name to be Product 1. Got '%v'", m["name"])
+	}
+
+	// Test non existing product
+	params = url.Values{}
+	params.Add("query", "Product 12")
+	endpoint = fmt.Sprintf("%s?%s", "/search", params.Encode())
+
+	req, _ = http.NewRequest("GET", endpoint, nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	response = executeRequest(req)
+	checkResponseCode(t, http.StatusNotFound, response.Code)
+
+	json.Unmarshal(response.Body.Bytes(), &m)
+	if m["error"] != "Product not found" {
+		t.Errorf("Expected the 'error' key of the response to be set to 'Product not found'. Got '%s'", m["error"])
+	}
 }
 
 const tableCreationQuery = `CREATE TABLE IF NOT EXISTS products

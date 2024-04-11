@@ -11,8 +11,11 @@ type product struct {
 }
 
 func (p *product) getProduct(db *sql.DB) error {
-	return db.QueryRow("SELECT name, price FROM products WHERE id=$1",
-		p.ID).Scan(&p.Name, &p.Price)
+	return db.QueryRow("SELECT name, price FROM products WHERE id=$1", p.ID).Scan(&p.Name, &p.Price)
+}
+
+func (p *product) searchProducts(db *sql.DB) error {
+	return db.QueryRow("SELECT name, price FROM products WHERE name LIKE $1", p.Name).Scan(&p.Name, &p.Price)
 }
 
 func (p *product) updateProduct(db *sql.DB) error {
@@ -41,10 +44,12 @@ func (p *product) createProduct(db *sql.DB) error {
 	return nil
 }
 
+func (p *product) getCheapestProduct(db *sql.DB) error {
+	return db.QueryRow("SELECT name, price FROM products WHERE price = (Select MIN(price) from products)").Scan(&p.Name, &p.Price)
+}
+
 func getProducts(db *sql.DB, start, count int) ([]product, error) {
-	rows, err := db.Query(
-		"SELECT id, name,  price FROM products LIMIT $1 OFFSET $2",
-		count, start)
+	rows, err := db.Query("SELECT id, name,  price FROM products LIMIT $1 OFFSET $2", count, start)
 
 	if err != nil {
 		return nil, err
