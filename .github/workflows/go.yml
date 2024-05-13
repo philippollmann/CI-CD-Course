@@ -47,8 +47,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ollmannphilipp/ci_cd_course:latest,ollmannphilipp/${{ github.sha }}
-          
+          tags: ollmannphilipp/ci_cd_course:latest,ollmannphilipp/ci_cd_course:${{ github.sha }}
+
   sonarcloud:
     needs: build
     runs-on: ubuntu-latest
