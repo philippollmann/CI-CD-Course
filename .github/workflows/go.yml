@@ -33,7 +33,7 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-  docker_deploy:
+  docker:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +47,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: philippollmann/ci_cd_course:0.0.1
+          tags: ollmannphilipp/ci_cd_course:0.0.1
 
   sonarcloud:
     needs: build
