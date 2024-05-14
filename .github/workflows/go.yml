@@ -80,7 +80,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build an image from Dockerfile
         run: |
-        docker build -t ollmannphilipp/ .
+        docker build -t ollmannphilipp/ci_cd_course:latest .
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
