@@ -49,9 +49,15 @@ jobs:
           context: .
           load: true
           tags: ollmannphilipp/ci_cd_course:test
-      - name: Test
-        run: |
-          docker run --rm ollmannphilipp/ci_cd_course:test          
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/ci_cd_course:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'         
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -70,23 +76,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  
-  trivy:
-    needs: build
-    name: Trivy
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build an image from Dockerfile
-        run: |
-        docker build -t ollmannphilipp/ci_cd_course:latest .
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'docker.io/ci_cd_course:latest'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
