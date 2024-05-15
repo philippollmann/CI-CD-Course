@@ -34,19 +34,19 @@ jobs:
       run: go test -v ./...
 
   trinity:
-  needs: build
-  runs-on: ubuntu-latest
-  steps:
-    - name: Run Trivy vulnerability scanner in IaC mode
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'config'
-        hide-progress: true
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        exit-code: '1'
-        ignore-unfixed: true
-        severity: 'CRITICAL,HIGH'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
 
   docker:
     needs: sonarcloud
